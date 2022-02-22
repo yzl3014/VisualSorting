@@ -3,7 +3,7 @@
 #include <graphics.h>
 using namespace std;
 int inOperationNums[32];//正在操作的数字将呈现不同的颜色提升视觉效果
-int width =5, bkwidth = 800, num = bkwidth / width - 10,operatingNum;
+int width =5, bkheight=500,bkwidth = 800, num = bkwidth / width,operatingNum;
 //上一行：分别为柱子宽度，画面宽度和柱子总数(***柱子总数可能与真实数量不一致***)
 int height[1024];///注意修改这里的参数，1024就差不多够了
 void refresh()//刷新一下屏幕
@@ -23,7 +23,7 @@ void refresh()//刷新一下屏幕
 		{
 			setfillcolor(RGB(255, 255, 255));
 		}
-		fillrectangle((i - 1) * width, height[i], i * width, 500);
+		fillrectangle((i - 1) * width, height[i], i * width, bkheight);
 	}
 	FlushBatchDraw();
 }
@@ -39,45 +39,53 @@ void makeColumn()//制造柱子
 	cleanShuZu();
 	setfillcolor(RGB(0, 0, 0));
 	setlinecolor(RGB(0, 0, 0));
-	for (int i = 0; i <= num; i++)
+	for (int i = 1; i < num+1; i++)
 	{
 		refresh();
 		int sjnum = rand() % bkwidth;
-		fillrectangle((i - 1) * width, sjnum, i * width, 500);
-		/*左上角x, y; 右上角x, y*/
+		fillrectangle((i - 1) * width, sjnum, i * width, bkheight);
+		/*左上角x, y; 右下角x, y*/
 		height[i] = bkwidth - sjnum;//因为easyX的坐标系是倒着的，所以柱子越高的num越小
 		refresh();
-		printf("%d\n", sjnum);
-		Sleep(2000);
+		//printf("%d\n", sjnum);
+		//Sleep(2000);
 	}
 }
-void sortNum()
+class sort
 {
-	refresh();
-	/// 下面是绝对正宗的冒泡排序算法！可以更改为其他算法
-	int temp;//互换时临时调用
-	for (int i = 0; i < num; i++)
+public:
+	void bubbleSort()
 	{
-		for (int j = 0; j < (num-i); j++)
-		/*上面的num - i是因为，经过这次for循环后一定有一个排完了，即最大的那一个。
-		因为它比所有数都大，就会一直向后
-		*/
+		int temp;//互换时临时调用
+		for (int i = 0; i < num; i++)
 		{
-			operatingNum = height[j];
-			refresh();
-			if (height[j] < height[j + 1])//如果第j个比第(j+1)个小，就互换位置(从大到小排序)
+			for (int j = 0; j < (num - i); j++)
+				/*上面的num - i是因为，经过这次for循环后一定有一个排完了，即最大的那一个。
+				因为它比所有数都大，就会一直向后
+				*/
 			{
-				temp = height[j];//一个简单的位置互换
-				height[j] = height[j + 1];
-				height[j + 1] = temp;
-			}
-			if (height[j] > height[j + 1])
-			{
-				continue;
+				operatingNum = height[j];
+				refresh();
+				if (height[j + 1] > height[j])//如果第j个比第(j+1)个小，就互换位置(从大到小排序)
+				{
+					temp = height[j + 1];//一个简单的位置互换
+					height[j + 1] = height[j];
+					height[j] = temp;
+				}
+				if (height[j + 1] < height[j])
+				{
+					continue;
+				}
+				Sleep(1);
 			}
 		}
 	}
-	//排序至此结束
+};
+void sortNum()
+{
+	sort sort;
+	refresh();
+	sort.bubbleSort();//此处写算法
 	//下面让每根柱子都显示绿色。只是为了视觉效果好，但也方便了调试
 	setfillcolor(RGB(0, 255, 0));
 	setlinecolor(RGB(0,0,0));
@@ -88,12 +96,12 @@ void sortNum()
 		Sleep(10);
 	}
 	printf("sort ok.\n");
-	Sleep(2000);
+	system("pause");
 }
 int main()
 {
 
-	initgraph(bkwidth, 500, SHOWCONSOLE);//宽，高
+	initgraph(bkwidth, bkheight, SHOWCONSOLE);//宽，高
 	setbkcolor(RGB(0, 0, 0));
 	BeginBatchDraw();
 	while (1)
